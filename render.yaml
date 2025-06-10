@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mohan-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: GROQ_API_KEY
+        value: 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

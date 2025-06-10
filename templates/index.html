@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>mkchatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="chatbox">
+        <h2>mkchatbot</h2>
+        <div id="chat-log"></div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const chatLog = document.getElementById("chat-log");
+            const userText = userInput.value.trim();
+            if (!userText) return;
+
+            chatLog.innerHTML += `<div class="user-msg">${userText}</div>`;
+
+            fetch(`/get?msg=${encodeURIComponent(userText)}`)
+                .then(res => res.text())
+                .then(data => {
+                    chatLog.innerHTML += `<div class="bot-msg">${data}</div>`;
+                    chatLog.scrollTop = chatLog.scrollHeight;
+                });
+
+            userInput.value = "";
+        }
+
+        document.getElementById("userInput").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
