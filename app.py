@@ -1,23 +1,30 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ Load Groq API Key from environment variable
+# Get GROQ API key securely from environment
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 @app.route("/")
 def index():
-    return render_template("index.html")  # Make sure this file exists in /templates
+    return render_template("index.html")
 
 @app.route("/ask", methods=["POST"])
 def ask():
     user_input = request.json.get("message")
     
     if not user_input:
-        return jsonify({"response": "Please type something."})
+        return jsonify({"response": "Please type something."}), 400
+
+    if not GROQ_API_KEY:
+        return jsonify({"response": "API key is missing. Set GROQ_API_KEY in your environment."}), 500
 
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -37,9 +44,11 @@ def ask():
         response.raise_for_status()
         reply = response.json()["choices"][0]["message"]["content"]
         return jsonify({"response": reply})
+    except requests.exceptions.HTTPError as http_err:
+        return jsonify({"response": f"HTTP Error: {http_err.response.status_code} - {http_err.response.text}"}), 500
     except Exception as e:
-        return jsonify({"response": f"Error: {str(e)}"})
+        return jsonify({"response": f"Error: {str(e)}"}), 500
 
-# ✅ Run on Render-friendly settings
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
