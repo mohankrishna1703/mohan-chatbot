@@ -4,13 +4,13 @@ import os
 
 app = Flask(__name__)
 
-# Load Groq API Key from environment variable
+# ✅ Load Groq API Key from environment variable
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html")  # Make sure this file exists in /templates
 
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -40,6 +40,6 @@ def ask():
     except Exception as e:
         return jsonify({"response": f"Error: {str(e)}"})
 
-# ✅ Proper host/port config for Render
+# ✅ Run on Render-friendly settings
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
